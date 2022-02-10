@@ -3,8 +3,20 @@ import { getPrismicClient } from "../../services/prismic";
 import styles from "./styles.module.scss";
 import Prismic from "@prismicio/client";
 import { GetStaticProps } from "next";
+import { RichText } from "prismic-dom";
 
-export default function Posts() {
+type Posts = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  updatedAt: string;
+};
+
+interface PostsProps {
+  posts: Posts[];
+}
+
+export default function Posts({ posts }: PostsProps) {
   return (
     <>
       <Head>
@@ -12,38 +24,15 @@ export default function Posts() {
       </Head>
       <main className={styles.container}>
         <div className={styles.posts}>
-          <a href="#">
-            <time> 9 de fevereiro de 2022 </time>
-            <strong>Creating anything with Prismic CMS</strong>
-            <p>
-              Muitos devs que acompanham nosso trabalho se perguntam como é o
-              meu processo de criação da parte visual de uma interface, seja uma
-              página de evento, website ou até mesmo a nossa plataforma de
-              ensino, o Station.
-            </p>
-          </a>
-
-          <a href="#">
-            <time> 9 de fevereiro de 2022 </time>
-            <strong>Creating anything with Prismic CMS</strong>
-            <p>
-              Muitos devs que acompanham nosso trabalho se perguntam como é o
-              meu processo de criação da parte visual de uma interface, seja uma
-              página de evento, website ou até mesmo a nossa plataforma de
-              ensino, o Station.
-            </p>
-          </a>
-
-          <a href="#">
-            <time> 9 de fevereiro de 2022 </time>
-            <strong>Creating anything with Prismic CMS</strong>
-            <p>
-              Muitos devs que acompanham nosso trabalho se perguntam como é o
-              meu processo de criação da parte visual de uma interface, seja uma
-              página de evento, website ou até mesmo a nossa plataforma de
-              ensino, o Station.
-            </p>
-          </a>
+          {posts.map((post) => {
+            return (
+              <a key={post.slug} href="#">
+                <time> {post.updatedAt} </time>
+                <strong>{post.title}</strong>
+                <p>{post.excerpt}</p>
+              </a>
+            );
+          })}
         </div>
       </main>
     </>
@@ -52,16 +41,34 @@ export default function Posts() {
 
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
-  const response = await prismic.query(
+  const response = await prismic.query<any>(
     [Prismic.predicates.at("document.type", "post")],
     {
-      fetch: ["post.tile", "post.content"],
+      fetch: ["post.title", "post.content"],
       pageSize: 100,
     }
   );
   console.log(response);
+  const posts = response.results.map((post) => {
+    return {
+      slug: post.uid,
+      title: RichText.asText(post.data.title),
+      excerpt:
+        post.data.content.find((content) => content.type === "paragraph")
+          ?.text ?? "",
+      updatedAt: new Date(post.last_publication_date).toLocaleDateString(
+        "pt-BR",
+        {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }
+      ),
+    };
+  });
+  console.log(posts);
 
   return {
-    props: {},
+    props: { posts },
   };
 };

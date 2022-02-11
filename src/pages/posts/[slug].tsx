@@ -4,7 +4,6 @@ import { getPrismicClient } from "../../services/prismic";
 import { RichText } from "prismic-dom";
 import Head from "next/head";
 import styles from "./post.module.scss";
-import { redirect } from "next/dist/server/api-utils";
 
 interface PostProps {
   post: {

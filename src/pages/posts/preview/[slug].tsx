@@ -7,6 +7,7 @@ import styles from "../post.module.scss";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { redirect } from "next/dist/server/api-utils";
 
 interface PostPreviewProps {
   post: {
@@ -26,6 +27,7 @@ export default function PostPreview({ post }: PostPreviewProps) {
       router.push(`/posts/${post.slug}`);
     }
   }, [session]);
+
   return (
     <>
       <Head>
@@ -79,6 +81,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     ),
   };
   return {
-    props: { post },
+    props: {
+      post,
+    },
+    redirect: 60 * 30,
   };
 };

@@ -20,10 +20,8 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     const user = await fauna.query<User>(
       q.Get(q.Match(q.Index("user_by_email"), q.Casefold(session.user.email)))
     );
-    console.log("user:", user);
 
     let customerId = user.data.stripe_customer_id;
-    console.log("Stripe Customer ID:", customerId);
 
     if (!customerId) {
       const stripeCustomer = await stripe.customers.create({

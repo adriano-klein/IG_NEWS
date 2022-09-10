@@ -12,11 +12,11 @@ export async function saveSubscription(
     q.Select(
       "ref",
       q.Get(q.Match(q.Index("user_by_stripe_customer_id"), customerId))
-    )
-  );
+      )
+      );
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  console.log(subscription);
+  
 
   //TODO: Salvar os dados da subscription do usuário no FaunaDB;
 
@@ -26,8 +26,6 @@ export async function saveSubscription(
     status: subscription.status,
     price_id: subscription.items.data[0].price.id,
   };
-
-  console.log(subscriptionData);
 
   if (createAction) {
     await fauna.query(
